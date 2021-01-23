@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using WebApi.CQRS.Decorator.Application;
 
 namespace WebApi.CQRS.Decorator.Controllers
 {
@@ -32,8 +33,22 @@ namespace WebApi.CQRS.Decorator.Controllers
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = rng.Next(-20, 55),
                 Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+            })           .ToArray();
+        }
+    }
+
+    [ApiController]
+    [Route("api/user")]
+    public class UserController
+    {
+        [HttpPost]
+        public ActionResult CreateUser(
+            [FromServices] CreateUserCommandHandler handler, 
+            [FromBody] CreateUserCommand command)
+        {
+            handler.Handle(command);
+
+            return new OkResult();
         }
     }
 }
