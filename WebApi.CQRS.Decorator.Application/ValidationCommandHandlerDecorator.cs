@@ -25,7 +25,7 @@ namespace WebApi.CQRS.Decorator.Application
             if (result.Errors.Any())
             {
                 var errorMessages = result.Errors.Select(x => x.ErrorMessage).ToList();
-
+                
                 throw new InvalidCommandException(errorMessages);
             }
             

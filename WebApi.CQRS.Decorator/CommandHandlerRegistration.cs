@@ -17,16 +17,12 @@ namespace WebApi.CQRS.Decorator
             var validator = (IValidator<TCommand>) Activator.CreateInstance(type);
 
             services.AddTransient<TCommandHandler>();
-            //
-            // services.AddTransient<ICommandHandler<TCommand>>(x =>
-            //     new LoggerCommandHandlerDecorator<TCommand>(
-            //         x.GetService<ILogger<TCommand>>(),
-            //         new ValidationCommandHandlerDecorator<TCommand>(x.GetService<TCommandHandler>(), validator)
-            //     )
-            // );
             
             services.AddTransient<ICommandHandler<TCommand>>(x =>
+                new LoggerCommandHandlerDecorator<TCommand>(
+                    x.GetService<ILogger<TCommand>>(),
                     new ValidationCommandHandlerDecorator<TCommand>(x.GetService<TCommandHandler>(), validator)
+                )
             );
 
             return services;

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -7,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using WebApi.CQRS.Decorator.Application;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Hellang.Middleware.ProblemDetails;
 
 namespace WebApi.CQRS.Decorator
 {
@@ -32,15 +31,17 @@ namespace WebApi.CQRS.Decorator
         public void ConfigureServices(IServiceCollection services)
         {
             var assemblies = AssemblyLoadContext.All.SelectMany(x => x.Assemblies);
-            // var assemblies = Assembly
-            //     .GetExecutingAssembly()
-            //     .GetReferencedAssemblies()
-            //     .Where(x => x.FullName.Contains("Application"));
+ 
             services.AddControllers().AddFluentValidation(
                 x => x.RegisterValidatorsFromAssemblies(assemblies));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "WebApi.CQRS.Decorator", Version = "v1"});
+            });
+            
+            services.AddProblemDetails(x =>
+            {
+                x.Map<InvalidCommandException>(ex => new InvalidCommandProblemDetails(ex));
             });
             
             services.RegisterCommandHandler<CreateUserCommandHandler, CreateUserCommand, CreateUserCommandValidator>();
@@ -54,6 +55,8 @@ namespace WebApi.CQRS.Decorator
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApi.CQRS.Decorator v1"));
+
+                app.UseProblemDetails();
             }
 
             app.UseHttpsRedirection();

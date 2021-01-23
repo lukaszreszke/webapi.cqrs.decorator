@@ -16,6 +16,7 @@
 
     <ItemGroup>
       <PackageReference Include="FluentValidation" Version="9.4.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     </ItemGroup>
 
 </Project>
